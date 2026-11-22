@@ -38,9 +38,7 @@ jobs:
       - uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6.0.0
         with:
           go-version-file: data-relay/go.mod
-          cache-dependency-path: |
-            data-relay/go.sum
-            data-relay/compat/harness/go.sum
+          cache-dependency-path: data-relay/go.sum
       - name: Go tests
         run: |
           unset GOROOT
@@ -51,27 +49,20 @@ jobs:
         run: |
           set -euo pipefail
           bash data-relay/scripts/package-linux.sh "$ARCH"
-          bash data-relay/scripts/package-linux.sh "$ARCH" --harness-bridge
-          verify_package() (
-            cd ".runtime/$1/linux-$ARCH"
-            sha256sum --check "SHA256SUMS-relay-linux-$ARCH"
-            stage=$(mktemp -d "$RUNNER_TEMP/relay-XXXXXX")
-            trap 'rm -rf -- "$stage"' EXIT
-            tar -xzf "sailry-relay-linux-$ARCH.tar.gz" -C "$stage"
-            for member in LICENSE NOTICE TRADEMARKS.md licenses/go-LICENSE licenses/go-PATENTS licenses/go-modules.json; do
-              test -s "$stage/$member"
-            done
-            version=$("$stage/sailry-relay" --version)
-            if [[ -n "$2" && "$version" != "Sailry Relay $2" ]]; then
-              echo "Expected $1 $2, got $version" >&2
-              exit 1
-            fi
-            printf '%s\n' "$version"
-          )
-          expected_version=
-          if [[ "$GITHUB_REF_TYPE" == tag ]]; then expected_version=${GITHUB_REF_NAME#v}; fi
-          verify_package relay "$expected_version"
-          verify_package relay-bridge 0.2.8
+          cd ".runtime/relay/linux-$ARCH"
+          sha256sum --check "SHA256SUMS-relay-linux-$ARCH"
+          stage=$(mktemp -d "$RUNNER_TEMP/relay-XXXXXX")
+          trap 'rm -rf -- "$stage"' EXIT
+          tar -xzf "sailry-relay-linux-$ARCH.tar.gz" -C "$stage"
+          for member in LICENSE NOTICE TRADEMARKS.md licenses/go-LICENSE licenses/go-PATENTS licenses/go-modules.json; do
+            test -s "$stage/$member"
+          done
+          version=$("$stage/sailry-relay" --version)
+          if [[ "$GITHUB_REF_TYPE" == tag && "$version" != "Sailry Relay ${GITHUB_REF_NAME#v}" ]]; then
+            echo "Expected Sailry Relay ${GITHUB_REF_NAME#v}, got $version" >&2
+            exit 1
+          fi
+          printf '%s\n' "$version"
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: data-relay-linux-${{ matrix.arch }}

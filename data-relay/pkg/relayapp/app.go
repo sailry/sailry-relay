@@ -18,7 +18,7 @@ import (
 	"github.com/sailry/sailry-relay/data-relay/internal/relaystate"
 )
 
-var releaseVersion = "0.2.9"
+const releaseVersion = "0.2.9"
 
 const usage = `Usage:
   sailry-relay start [--config <path>] [--port <port>]
