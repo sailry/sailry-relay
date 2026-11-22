@@ -1,0 +1,6 @@
+Sailry Relay
+Copyright 2026 Sailry contributors
+
+The data relay and pairing service were extracted from sailry/sailry-harness
+at 5862c0d03ddb67349e3765308e5b92920315330a. See LICENSE, TRADEMARKS.md,
+the pairing service notices and the notices included in distribution archives.
