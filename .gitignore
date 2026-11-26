@@ -1,4 +1,7 @@
 .runtime/
+go.work
+go.work.sum
+/benchmarks/
 node_modules/
 dist/
 .DS_Store
